@@ -26,5 +26,6 @@ public class LoginFormController {
         Stage window = (Stage) LoginContext.getScene().getWindow();
         window.setScene(new Scene(parent));
         window.show();
+
     }
 }

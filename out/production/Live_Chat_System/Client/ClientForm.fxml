@@ -2,23 +2,24 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="561.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.ClientFormController">
+<AnchorPane prefHeight="561.0" prefWidth="600.0" style="-fx-background-color: #dfe6e9;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Client.ClientFormController">
     <children>
         <Label layoutX="14.0" layoutY="14.0" prefHeight="30.0" prefWidth="176.0" text="Chat Room">
             <font>
                 <Font name="System Bold Italic" size="21.0" />
             </font>
         </Label>
-        <AnchorPane fx:id="ClientContext" layoutX="1.0" layoutY="57.0" prefHeight="430.0" prefWidth="600.0" style="-fx-background-color: #dfe6e9;" />
-        <TextField fx:id="txtMessage" layoutX="65.0" layoutY="494.0" prefHeight="31.0" prefWidth="408.0" style="-fx-background-color: #dfe6e9;" />
+        <TextField fx:id="txtMessage" layoutX="46.0" layoutY="494.0" prefHeight="31.0" prefWidth="427.0" />
         <Button layoutX="481.0" layoutY="494.0" mnemonicParsing="false" onAction="#btnSendMessage" prefHeight="31.0" prefWidth="71.0" style="-fx-background-color: #0984e3;" text="Send" textFill="WHITE">
             <font>
                 <Font name="System Bold" size="15.0" />
             </font>
         </Button>
+      <TextArea fx:id="ClientContext" layoutX="24.0" layoutY="59.0" prefHeight="419.0" prefWidth="546.0" />
     </children>
 </AnchorPane>
