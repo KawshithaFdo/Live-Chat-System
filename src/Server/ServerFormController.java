@@ -4,39 +4,39 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
-public class ServerFormController {
-    Socket accept;
+public class ServerFormController extends Thread {
+    private Socket accept;
+    private PrintWriter printWriter;
+    private ArrayList<ServerFormController> thread;
 
-    public void initialize() throws IOException {
+    public ServerFormController(Socket socket, ArrayList<ServerFormController> thread){
+        this.accept = socket;
+        this.thread = thread;
+    }
 
-        new Thread(()->{
+    public void run() {
             try {
-                //Client Message = record
-                String record = "";
-                ServerSocket serverSocket=new ServerSocket(3000);
-                accept=serverSocket.accept();
+                InputStreamReader inputStreamReader = new InputStreamReader(accept.getInputStream());
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
+                printWriter=new PrintWriter(accept.getOutputStream(),true);
+                while (true){
+                    String outputString = bufferedReader.readLine();
 
-                while (!(record.equals("exit"))){
-                    InputStreamReader inputStreamReader = new InputStreamReader(accept.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                    record = bufferedReader.readLine();
-                    System.out.println(record);
-
-                    PrintWriter printWriter=new PrintWriter(accept.getOutputStream());
-                    printWriter.println(record);
-                    printWriter.flush();
-
+                    if(outputString.equals("exit")){
+                        break;
+                    }
+                    for (ServerFormController s : thread) {
+                        s.printWriter.println(outputString);
+                    }
+                    System.out.println("Server Success. " + outputString);
                 }
 
-
-
             }catch (Exception e){
-                e.printStackTrace();
+                System.out.println("Server Error" + e.getStackTrace());
             }
-        }).start();
     }
 }

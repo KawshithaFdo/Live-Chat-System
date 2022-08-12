@@ -1,40 +1,35 @@
 package Client;
 
-import javafx.event.ActionEvent;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.input.MouseEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.net.Socket;
 
-public class ClientFormController {
+public class ClientFormController{
     public TextField txtMessage;
     public String username;
     public TextArea ClientContext;
-    Socket socket=null;
+    public Socket socket;
+    PrintWriter printWriter;
+    BufferedReader bufferedReader;
 
     public void initialize(){
         new Thread(()->{
             try {
-                String record = "";
-                int i=0;
+
                 socket=new Socket("localhost",3000);
+                System.out.println(username+" is Connected.");
 
-                while (!(record.equals("exit"))){
                     InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                    record = bufferedReader.readLine();
-                    System.out.println(record);
+                    bufferedReader = new BufferedReader(inputStreamReader);
+                    printWriter=new PrintWriter(socket.getOutputStream(),true);
+                    System.out.println(bufferedReader.readLine());
 
-                    ClientContext.setPrefRowCount(i++);
-                    ClientContext.setStyle("-fx-font-size: 20px;-fx-font-family: 'Bookshelf Symbol 7'");
-                    ClientContext.appendText("\n"+username+" : "+record+"\n");
-                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -44,15 +39,14 @@ public class ClientFormController {
 
     }
 
-    public void btnSendMessage(ActionEvent actionEvent) throws IOException {
-        PrintWriter printWriter=new PrintWriter(socket.getOutputStream());
-        printWriter.println(txtMessage.getText());
-        printWriter.flush();
+
+    public void btnSendMessage(MouseEvent keyEvent) throws IOException {
+        String record = bufferedReader.readLine();
+        ClientContext.setStyle("-fx-font-size: 20px;-fx-font-family: 'Bookshelf Symbol 7'");
+        ClientContext.appendText("\n"+username+" : "+record+"\n");
+        printWriter.println(record);
         txtMessage.setText("");
 
-
     }
-
-
 }
 
