@@ -1,18 +1,9 @@
 package Server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.util.ArrayList;
+public class ServerFormController {
 
-public class ServerFormController extends Thread {
-    private Socket accept;
-    private PrintWriter printWriter;
-    private ArrayList<ServerFormController> thread;
-
-    public ServerFormController(Socket socket, ArrayList<ServerFormController> thread){
+}
+   /* public ServerFormController(Socket socket, ArrayList<ServerFormController> thread){
         this.accept = socket;
         this.thread = thread;
     }
@@ -38,5 +29,5 @@ public class ServerFormController extends Thread {
             }catch (Exception e){
                 System.out.println("Server Error" + e.getStackTrace());
             }
-    }
-}
+    }*/
+

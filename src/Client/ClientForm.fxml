@@ -19,7 +19,7 @@
             </font>
         </Label>
         <TextField fx:id="txtMessage" layoutX="34.0" layoutY="490.0" prefHeight="39.0" prefWidth="427.0" promptText="Type Here" style="-fx-background-radius: 50;" />
-        <TextArea fx:id="ClientContext" layoutX="44.0" layoutY="55.0" prefHeight="419.0" prefWidth="434.0" />
+        <TextArea fx:id="ClientContext" editable="false" layoutX="44.0" layoutY="55.0" prefHeight="419.0" prefWidth="434.0" />
       <ImageView fitHeight="39.0" fitWidth="51.0" layoutX="461.0" layoutY="490.0" onMouseClicked="#btnSendMessage" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../asserts/send.png" />

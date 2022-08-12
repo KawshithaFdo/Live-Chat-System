@@ -5,43 +5,43 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class ServerInitializer {
-    private static Socket socket;
-    private static ServerSocket serverSocket;
 
     public static void main(String[] args) {
+            new Thread(()->{
+                try {
+                    //Client Message = record
+                    String record = "";
+                    ServerSocket serverSocket=new ServerSocket(3000);
+                    System.out.println("Server Started");
 
-        //add all the clients Threads to list
-        ArrayList<ServerFormController> threadArrayList = new ArrayList<>();
+                    Socket accept=serverSocket.accept();
 
-        try(ServerSocket serverSocket = new ServerSocket(3000)){
 
-            System.out.println("Server Started...");
+                    while (true){
+                        record=new BufferedReader(new InputStreamReader(accept.getInputStream())).readLine();
+//                        System.out.println(record);
 
-            while(true){
-                Socket socket = serverSocket.accept();
-                ServerFormController serverThread = new ServerFormController(socket, threadArrayList);
+                        PrintWriter printWriter=new PrintWriter(accept.getOutputStream());
+                        printWriter.println(record);
+                        printWriter.flush();
 
-                //Starting the Thread
-                threadArrayList.add(serverThread);
-                serverThread.start();
+                    }
 
-            }
-        } catch (IOException e) {
-            System.out.println("Error : " + e.getStackTrace());
-        }/*finally{
-            try {
-                socket.close();
-                serverSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
+                }catch (Exception e){
+                    System.out.println("Server Error " +  e.getStackTrace());
+                }
+            }).start();
+
+
     }
 
 }
