@@ -4,8 +4,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 public class ClientFormController{
     public TextField txtMessage;
@@ -56,6 +59,32 @@ public class ClientFormController{
     }
 
     public void CameraOnAction(MouseEvent mouseEvent) {
+        new Thread(()->{
+            Socket socket = null;
+            try {
+                socket = new Socket("localhost", 13085);
+                OutputStream outputStream = socket.getOutputStream();
+
+                BufferedImage image = ImageIO.read(new File("D:\\GDSE57\\SEM_02\\INP\\socket\\Live_Chat_System\\src\\asserts\\desert.jpeg"));
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ImageIO.write(image, "jpeg", byteArrayOutputStream);
+
+                byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+                outputStream.write(size);
+                outputStream.write(byteArrayOutputStream.toByteArray());
+                outputStream.flush();
+                System.out.println("Flushed: " + System.currentTimeMillis());
+
+                Thread.sleep(120000);
+                System.out.println("Closing: " + System.currentTimeMillis());
+                socket.close();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }).start();
+
     }
 }
 

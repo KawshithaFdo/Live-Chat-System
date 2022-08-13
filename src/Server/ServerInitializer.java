@@ -5,17 +5,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class ServerInitializer {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
             new Thread(()->{
                 try {
                     //Client Message = record
@@ -41,7 +41,36 @@ public class ServerInitializer {
                 }
             }).start();
 
-        sim_sock ob=new sim_sock();
+            new Thread(()->{
+                ServerSocket serverSocket2 = null;
+                try {
+                    serverSocket2 = new ServerSocket(13085);
+                    Socket socket = serverSocket2.accept();
+                    InputStream inputStream = socket.getInputStream();
+
+                    System.out.println("Reading: " + System.currentTimeMillis());
+
+                    byte[] sizeAr = new byte[4];
+                    inputStream.read(sizeAr);
+                    int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+                    byte[] imageAr = new byte[size];
+                    inputStream.read(imageAr);
+
+                    BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+
+                    System.out.println("Received " + image.getHeight() + "x" + image.getWidth() + ": " + System.currentTimeMillis());
+                    ImageIO.write(image, "jpeg", new File("D:\\GDSE57\\SEM_02\\INP\\socket\\Live_Chat_System\\src\\asserts\\desert2.jpeg"));
+
+                    serverSocket2.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }).start();
+
+
+
     }
 
 }
