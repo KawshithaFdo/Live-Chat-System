@@ -4,10 +4,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class ClientFormController{
@@ -24,7 +21,7 @@ public class ClientFormController{
                 socket=new Socket("localhost",3000);
                 System.out.println(username+" is connected.");
 
-                InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
+                InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream(),"UTF8");
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 record = bufferedReader.readLine();
 
@@ -32,7 +29,7 @@ public class ClientFormController{
                     System.out.println(username+" Said :"+record);
                     ClientContext.setStyle("-fx-font-size: 20px;-fx-font-family: 'Bookshelf Symbol 7'");
                     ClientContext.appendText("\n"+username+" : "+record+"\n");
-                    inputStreamReader = new InputStreamReader(socket.getInputStream());
+                    inputStreamReader = new InputStreamReader(socket.getInputStream(),"UTF8");
                     bufferedReader = new BufferedReader(inputStreamReader);
                     record = bufferedReader.readLine();
                 }
@@ -46,6 +43,7 @@ public class ClientFormController{
             }
 
         }).start();
+
     }
 
 
@@ -55,6 +53,9 @@ public class ClientFormController{
         printWriter.flush();
         txtMessage.setText("");
 
+    }
+
+    public void CameraOnAction(MouseEvent mouseEvent) {
     }
 }
 

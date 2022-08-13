@@ -29,5 +29,10 @@
          </cursor>
       </ImageView>
       <Separator layoutX="6.0" layoutY="481.0" prefHeight="2.0" prefWidth="508.0" />
+      <ImageView fitHeight="39.0" fitWidth="39.0" layoutX="411.0" layoutY="490.0" onMouseClicked="#CameraOnAction" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../asserts/camera.png" />
+         </image>
+      </ImageView>
     </children>
 </AnchorPane>

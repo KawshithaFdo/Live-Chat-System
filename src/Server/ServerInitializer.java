@@ -41,7 +41,7 @@ public class ServerInitializer {
                 }
             }).start();
 
-
+        sim_sock ob=new sim_sock();
     }
 
 }
