@@ -73,6 +73,7 @@ public class ClientFormController{
                 byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
                 outputStream.write(size);
                 outputStream.write(byteArrayOutputStream.toByteArray());
+
                 outputStream.flush();
                 System.out.println("Flushed: " + System.currentTimeMillis());
 
