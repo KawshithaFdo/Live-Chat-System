@@ -1,5 +1,6 @@
 package Client;
 
+import javafx.geometry.NodeOrientation;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -10,52 +11,70 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
-public class ClientFormController{
+public class ClientFormController extends Thread{
     public TextField txtMessage;
     public String username;
     public TextArea ClientContext;
 
-    Socket socket;
+    public BufferedReader reader;
+    public PrintWriter writer;
+    public Socket socket;
+
     public void initialize(){
+        System.out.println("Initialized method " + username);
+        try{
+            socket = new Socket("localhost", 3000);
+            System.out.println("Socket Connected.");
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            this.start();
 
-        new Thread(()->{
-            try {
-                String record="";
-                socket=new Socket("localhost",3000);
-                System.out.println(username+" is connected.");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
-                InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream(),"UTF8");
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                record = bufferedReader.readLine();
-
-                while (!(record.equals("exit"))){
-                    System.out.println(username+" Said :"+record);
-                    ClientContext.setStyle("-fx-font-size: 20px;-fx-font-family: 'Bookshelf Symbol 7'");
-                    ClientContext.appendText("\n"+username+" : "+record+"\n");
-                    inputStreamReader = new InputStreamReader(socket.getInputStream(),"UTF8");
-                    bufferedReader = new BufferedReader(inputStreamReader);
-                    record = bufferedReader.readLine();
-                }
-                if (record.equals("exit")) {
-                    System.out.println(username+" is Exit.");
-                    System.exit(0);
-                }
-
-            } catch (Exception e) {
-                System.out.println("Client Error " +  e.getStackTrace());
-            }
-
-        }).start();
+    public void btnSendMessage(MouseEvent keyEvent) throws IOException {
+        String msg = txtMessage.getText().trim();
+        writer.println(username + ": "+ msg);
+        ClientContext.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+        txtMessage.setText("");
+        if(msg.equalsIgnoreCase("Bye") || (msg.equalsIgnoreCase("logout"))){
+            System.exit(0);
+        }
 
     }
 
+    @Override
+    public void run() {
+        try{
+            while (true){
+                String msg = reader.readLine();
+                String[] tokens = msg.split(" ");
+                String cmd = tokens[0];
+                StringBuilder fullMessage = new StringBuilder();
+                for (int i = 1; i < tokens.length; i++) {
+                    fullMessage.append(tokens[i]);
+                }
 
-    public void btnSendMessage(MouseEvent keyEvent) throws IOException {
-        PrintWriter printWriter=new PrintWriter(socket.getOutputStream());
-        printWriter.println(txtMessage.getText());
-        printWriter.flush();
-        txtMessage.setText("");
+                System.out.println(fullMessage);
 
+                if(cmd.equalsIgnoreCase(username + ": ")){
+                    continue;
+                }else if (fullMessage.toString().equalsIgnoreCase("bye")){
+                    break;
+                }
+
+                ClientContext.appendText(msg + "\n\n");
+            }
+
+            reader.close();
+            writer.close();
+            socket.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void CameraOnAction(MouseEvent mouseEvent) {

@@ -1,33 +1,51 @@
 package Server;
 
-public class ServerFormController {
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
 
-}
-   /* public ServerFormController(Socket socket, ArrayList<ServerFormController> thread){
-        this.accept = socket;
+public class ServerFormController extends Thread {
+    private Socket socket;
+    private ArrayList<ServerFormController> thread;
+    private PrintWriter output;
+
+     public ServerFormController(Socket socket, ArrayList<ServerFormController> thread){
+        this.socket = socket;
         this.thread = thread;
     }
 
     public void run() {
-            try {
-                InputStreamReader inputStreamReader = new InputStreamReader(accept.getInputStream());
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        try{
+            //Reading the input from Client
+            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                printWriter=new PrintWriter(accept.getOutputStream(),true);
-                while (true){
-                    String outputString = bufferedReader.readLine();
+            /*returning the output to the client : true statement is to flush the buffer otherwise
+            we have to do it manually*/
+            output = new PrintWriter(socket.getOutputStream(), true);
 
-                    if(outputString.equals("exit")){
-                        break;
-                    }
-                    for (ServerFormController s : thread) {
-                        s.printWriter.println(outputString);
-                    }
-                    System.out.println("Server Success. " + outputString);
+            //infinite loop for server
+            while(true){
+                String outputString = input.readLine();
+
+                //if user type exit command then program will terminate
+                if(outputString.equals("exit")){
+                    break;
                 }
-
-            }catch (Exception e){
-                System.out.println("Server Error" + e.getStackTrace());
+                printToAllClients(outputString);
+                System.out.println("Server received " + outputString);
             }
-    }*/
+        } catch (Exception e){
+            System.out.println("Error occurred " + e.getStackTrace());
+        }
+    }
+
+    private void printToAllClients(String outputString) {
+        for (ServerFormController sT : thread) {
+            sT.output.println(outputString);
+        }
+    }
+}
+
 
