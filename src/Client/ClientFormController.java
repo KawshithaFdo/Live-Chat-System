@@ -1,9 +1,23 @@
 package Client;
 
+import Login.LoginFormController;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.geometry.NodeOrientation;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -14,17 +28,22 @@ import java.nio.ByteBuffer;
 public class ClientFormController extends Thread{
     public TextField txtMessage;
     public String username;
-    public TextArea ClientContext;
+    public VBox vbox;
+    public Label lblusername;
 
-    public BufferedReader reader;
-    public PrintWriter writer;
-    public Socket socket;
+    BufferedReader reader;
+     PrintWriter writer;
+     Socket socket;
+
+    private FileChooser fileChooser;
+    private File filePath;
 
     public void initialize(){
-        System.out.println("Initialized method " + username);
+        username= LoginFormController.userName;
+        lblusername.setText(username);
+        System.out.println(username + " is Connected. ");
         try{
             socket = new Socket("localhost", 3000);
-            System.out.println("Socket Connected.");
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream(), true);
             this.start();
@@ -34,43 +53,115 @@ public class ClientFormController extends Thread{
         }
     }
 
-    public void btnSendMessage(MouseEvent keyEvent) throws IOException {
-        String msg = txtMessage.getText().trim();
-        writer.println(username + ": "+ msg);
-        ClientContext.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
-        txtMessage.setText("");
-        if(msg.equalsIgnoreCase("Bye") || (msg.equalsIgnoreCase("logout"))){
-            System.exit(0);
-        }
-
+    public void btnSendMessage(MouseEvent keyEvent) {
+       sendMessage();
     }
 
     @Override
     public void run() {
         try{
-            while (true){
+            while (true) {
                 String msg = reader.readLine();
                 String[] tokens = msg.split(" ");
                 String cmd = tokens[0];
+
                 StringBuilder fullMessage = new StringBuilder();
                 for (int i = 1; i < tokens.length; i++) {
-                    fullMessage.append(tokens[i]);
+                    fullMessage.append(tokens[i] + " ");
                 }
 
-                System.out.println(fullMessage);
-
-                if(cmd.equalsIgnoreCase(username + ": ")){
-                    continue;
-                }else if (fullMessage.toString().equalsIgnoreCase("bye")){
-                    break;
+                String[] msgToAr = msg.split(" ");
+                String st = "";
+                for (int i = 0; i < msgToAr.length - 1; i++) {
+                    st += msgToAr[i + 1] + " ";
                 }
 
-                ClientContext.appendText(msg + "\n\n");
+                Text text = new Text(st);
+                String firstChars = "";
+                if (st.length() > 3) {
+                    firstChars = st.substring(0, 3);
+
+                }
+
+
+                if (firstChars.equalsIgnoreCase("img")) {
+                    //for the Images
+
+                    st = st.substring(3, st.length() - 1);
+
+
+                    File file = new File(st);
+                    Image image = new Image(file.toURI().toString());
+
+                    ImageView imageView = new ImageView(image);
+
+                    imageView.setFitHeight(150);
+                    imageView.setFitWidth(200);
+
+
+                    HBox hBox = new HBox(10);
+                    hBox.setAlignment(Pos.BOTTOM_RIGHT);
+
+
+                    if (!cmd.equalsIgnoreCase(username)) {
+
+                        vbox.setAlignment(Pos.TOP_LEFT);
+                        hBox.setAlignment(Pos.CENTER_LEFT);
+
+
+                        Text text1 = new Text("  " + cmd + " :");
+                        hBox.getChildren().add(text1);
+                        hBox.getChildren().add(imageView);
+
+                    } else {
+                        hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                        hBox.getChildren().add(imageView);
+                        Text text1 = new Text(": Me ");
+                        hBox.getChildren().add(text1);
+
+                    }
+
+                    Platform.runLater(() -> vbox.getChildren().addAll(hBox));
+
+
+                } else {
+
+                    TextFlow tempFlow = new TextFlow();
+
+                    if (!cmd.equalsIgnoreCase(username + ":")) {
+                        Text txtName = new Text(cmd + " ");
+                        txtName.getStyleClass().add("txtName");
+                        tempFlow.getChildren().add(txtName);
+                    }
+
+                    tempFlow.getChildren().add(text);
+                    tempFlow.setMaxWidth(200); //200
+
+                    TextFlow flow = new TextFlow(tempFlow);
+
+                    HBox hBox = new HBox(12); //12
+
+                    //=================================================
+
+
+                    if (!cmd.equalsIgnoreCase(username + ":")) {
+
+                        vbox.setAlignment(Pos.TOP_LEFT);
+                        hBox.setAlignment(Pos.CENTER_LEFT);
+                        hBox.getChildren().add(flow);
+
+                    } else {
+
+                        Text text2 = new Text("Me : " + fullMessage);
+                        TextFlow flow2 = new TextFlow(text2);
+                        hBox.setAlignment(Pos.BOTTOM_RIGHT);
+                        hBox.getChildren().add(flow2);
+                    }
+
+                    Platform.runLater(() -> vbox.getChildren().addAll(hBox));
+
+                }
             }
-
-            reader.close();
-            writer.close();
-            socket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -78,33 +169,29 @@ public class ClientFormController extends Thread{
     }
 
     public void CameraOnAction(MouseEvent mouseEvent) {
-        new Thread(()->{
-            Socket socket = null;
-            try {
-                socket = new Socket("localhost", 13085);
-                OutputStream outputStream = socket.getOutputStream();
+        Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
+        fileChooser = new FileChooser();
+        fileChooser.setTitle("Open");
+        this.filePath = fileChooser.showOpenDialog(stage);
+        writer.println(username + " " + "img" + filePath.getPath());
 
-                BufferedImage image = ImageIO.read(new File("D:\\GDSE57\\SEM_02\\INP\\socket\\Live_Chat_System\\src\\asserts\\desert.jpeg"));
+    }
 
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ImageIO.write(image, "jpeg", byteArrayOutputStream);
+    public void sendOnAction(ActionEvent actionEvent) {
+        sendMessage();
+    }
 
-                byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-                outputStream.write(size);
-                outputStream.write(byteArrayOutputStream.toByteArray());
+    public void sendMessage(){
+        String msg = txtMessage.getText();
+        //System.out.println(msg);
 
-                outputStream.flush();
-                System.out.println("Flushed: " + System.currentTimeMillis());
 
-                Thread.sleep(120000);
-                System.out.println("Closing: " + System.currentTimeMillis());
-                socket.close();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }).start();
-
+        if(msg.equalsIgnoreCase("bye") || (msg.equalsIgnoreCase("exit"))) {
+            System.out.println(username + " is Disconnected.");
+            System.exit(0);
+        }
+        writer.println(username + ": " + txtMessage.getText());
+        txtMessage.clear();
     }
 }
 

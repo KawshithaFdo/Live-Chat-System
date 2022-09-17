@@ -1,8 +1,6 @@
 package Server;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -10,42 +8,47 @@ public class ServerFormController extends Thread {
     private Socket socket;
     private ArrayList<ServerFormController> thread;
     private PrintWriter output;
+    private BufferedReader reader;
 
      public ServerFormController(Socket socket, ArrayList<ServerFormController> thread){
-        this.socket = socket;
-        this.thread = thread;
-    }
+
+         try {
+
+             this.socket = socket;
+             this.thread = thread;
+             this.reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             this.output=new PrintWriter(socket.getOutputStream(),true);
+
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+     }
 
     public void run() {
-        try{
-            //Reading the input from Client
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            /*returning the output to the client : true statement is to flush the buffer otherwise
-            we have to do it manually*/
-            output = new PrintWriter(socket.getOutputStream(), true);
-
-            //infinite loop for server
-            while(true){
-                String outputString = input.readLine();
-
-                //if user type exit command then program will terminate
-                if(outputString.equals("exit")){
-                    break;
+        try {
+            String value;
+            while ((value = reader.readLine()) != null) {
+                if (value.equalsIgnoreCase( "exit")) {
+                    return;
                 }
-                printToAllClients(outputString);
-                System.out.println("Server received " + outputString);
+                for (ServerFormController se : thread) {
+                    se.output.println(value);
+                }
             }
-        } catch (Exception e){
-            System.out.println("Error occurred " + e.getStackTrace());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                reader.close();
+                output.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void printToAllClients(String outputString) {
-        for (ServerFormController sT : thread) {
-            sT.output.println(outputString);
-        }
-    }
 }
 
 
